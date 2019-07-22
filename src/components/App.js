@@ -1,119 +1,151 @@
-import React, { Component } from "react";
-// import { Provider } from "react-redux";
+import React, { useState } from "react";
 import "../css/App.css";
-import Display from "../components/Display";
-// import store from "../store";
-class App extends Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-			expression: "",
-			currentValue: 0,
-			result: ""
-		};
 
-		this.clearAll = this.clearAll.bind(this);
-		this.evaluateResult = this.evaluateResult.bind(this);
-		this.handleDecimal = this.handleDecimal.bind(this);
-		this.handleNumber = this.handleNumber.bind(this);
-		this.handleOperators = this.handleOperators.bind(this);
-	}
+function App() {
+  const [currentOperand, setCurrentOperand] = useState(0);
+  const [previousOperand, setPreviousOperand] = useState("");
+  const [currentOperation, setCurrentOperation] = useState("");
 
-	clearAll() {
-		this.setState({
-			expression: "",
-			currentValue: 0,
-			result: ""
-		});
-	}
+  const clear = () => {
+    setCurrentOperand(0);
+    setPreviousOperand("");
+    setCurrentOperation("");
+  };
 
-	evaluateResult() {}
+  const compute = () => {
+    let result;
+    const prev = parseFloat(previousOperand);
+    const current = parseFloat(currentOperand);
+    if (isNaN(prev) || isNaN(current)) return;
+    switch (currentOperation) {
+      case "+":
+        result = prev + current;
+        break;
+      case "-":
+        result = prev - current;
+        break;
+      case "*":
+        result = prev * current;
+        break;
+      case "/":
+        result = prev / current;
+        break;
+      default:
+        return;
+    }
+    setCurrentOperand(result);
+    setCurrentOperation("");
+    setPreviousOperand("");
+  };
 
-	handleDecimal() {}
+  const inputOperator = operator => {
+    if (currentOperand === "") return;
+    // if previous operator is there, compute the result and chain next operation
+    if (previousOperand !== "") {
+      compute();
+    }
+    setCurrentOperation(operator);
+    setPreviousOperand(currentOperand);
+    setCurrentOperand("");
+  };
 
-	handleOperators(e) {
-		const operator = e.target.innerText;
-		console.log(operator);
-	}
+  const getDisplayNumber = number => {
+    const strNum = number.toString();
+    const intDigits = parseFloat(strNum.split("."));
+    const decDigits = strNum.split(".")[1];
+    let intDisplay;
+    if (isNaN(intDigits)) {
+      intDisplay = "";
+    } else {
+      intDisplay = intDigits.toLocaleString("en", {
+        maximumFractionDigits: 0
+      });
+    }
+    if (decDigits != null) {
+      return `${intDisplay}.${decDigits}`;
+    } else {
+      return intDisplay;
+    }
+  };
 
-	handleNumber(e) {
-		const num = e.target.innerText;
-		const lastAdded = this.state.expression.slice(-1);
-		if (!isNaN(lastAdded)) {
-			this.setState({
-				expression: this.state.expression + num,
-				currentValue: this.state.expression + "" + num
-			});
-		} else {
-			this.setState({
-				expression: this.state.expression + num,
-				currentValue: num
-			});
-		}
-	}
+  const inputNumber = number => {
+    if (number === "." && currentOperand.includes(".")) return;
+    if (currentOperand === 0) {
+      setCurrentOperand(number + "");
+    } else {
+      setCurrentOperand(currentOperand + "" + number);
+    }
+  };
 
-	render() {
-		return (
-			// <Provider store={store}>
-			<div className="calculator">
-				<Display
-					currentValue={this.state.currentValue}
-					expression={this.state.expression}
-				/>
-				<button onClick={this.clearAll} id="clear" className="clear">
-					AC
-				</button>
-				<button onClick={this.handleOperators} id="divide">
-					/
-				</button>
-				<button onClick={this.handleOperators} id="multiply">
-					X
-				</button>
-				<button onClick={this.handleNumber} id="seven">
-					7
-				</button>
-				<button onClick={this.handleNumber} id="eight">
-					8
-				</button>
-				<button onClick={this.handleNumber} id="nine">
-					9
-				</button>
-				<button onClick={this.handleOperators} id="subtract">
-					-
-				</button>
-				<button onClick={this.handleNumber} id="four">
-					4
-				</button>
-				<button onClick={this.handleNumber} id="five">
-					5
-				</button>
-				<button onClick={this.handleNumber} id="six">
-					6
-				</button>
-				<button onClick={this.handleOperators} id="add">
-					+
-				</button>
-				<button onClick={this.handleNumber} id="one">
-					1
-				</button>
-				<button onClick={this.handleNumber} id="two">
-					2
-				</button>
-				<button onClick={this.handleNumber} id="three">
-					3
-				</button>
-				<button onClick={this.evaluateResult} id="equals" className="equals">
-					=
-				</button>
-				<button onClick={this.handleNumber} id="zero" className="zero">
-					0
-				</button>
-				<button onClick={this.handleDecimal} id="decimal">
-					.
-				</button>
-			</div>
-		);
-	}
+  const equals = () => {
+    compute();
+  };
+
+  return (
+    <div className="calculator">
+      <div id="display" className="display">
+        <div className="previous-operand">
+          {currentOperation !== ""
+            ? getDisplayNumber(previousOperand) + "" + currentOperation
+            : getDisplayNumber(previousOperand)}
+        </div>
+        <div className="current-operand">
+          {getDisplayNumber(currentOperand)}
+        </div>
+      </div>
+      <button id="clear" onClick={clear}>
+        AC
+      </button>
+      <button id="divide" onClick={() => inputOperator("/")}>
+        /
+      </button>
+      <button id="multiply" onClick={() => inputOperator("*")}>
+        X
+      </button>
+      <button id="seven" onClick={() => inputNumber(7)}>
+        7
+      </button>
+      <button id="eight" onClick={() => inputNumber(8)}>
+        8
+      </button>
+      <button id="nine" onClick={() => inputNumber(9)}>
+        9
+      </button>
+      <button id="subtract" onClick={() => inputOperator("-")}>
+        -
+      </button>
+      <button id="four" onClick={() => inputNumber(4)}>
+        4
+      </button>
+      <button id="five" onClick={() => inputNumber(5)}>
+        5
+      </button>
+      <button id="six" onClick={() => inputNumber(6)}>
+        6
+      </button>
+      <button id="add" onClick={() => inputOperator("+")}>
+        +
+      </button>
+      <button id="one" onClick={() => inputNumber(1)}>
+        1
+      </button>
+      <button id="two" onClick={() => inputNumber(2)}>
+        2
+      </button>
+      <button id="three" onClick={() => inputNumber(3)}>
+        3
+      </button>
+      <button id="equals" onClick={() => equals()}>
+        =
+      </button>
+      <button id="zero" onClick={() => inputNumber(0)}>
+        0
+      </button>
+      <button id="decimal" onClick={() => inputNumber(".")}>
+        .
+      </button>
+    </div>
+  );
 }
 
 export default App;
