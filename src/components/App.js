@@ -3,49 +3,105 @@ import "../css/App.css";
 
 function App() {
   const [currentOperand, setCurrentOperand] = useState(0);
-  const [previousOperand, setPreviousOperand] = useState("");
-  const [currentOperation, setCurrentOperation] = useState("");
+  const [infixStack, setInfixStack] = useState([]);
 
   const clear = () => {
     setCurrentOperand(0);
-    setPreviousOperand("");
-    setCurrentOperation("");
+    setInfixStack([]);
   };
 
-  const compute = () => {
-    let result;
-    const prev = parseFloat(previousOperand);
-    const current = parseFloat(currentOperand);
-    if (isNaN(prev) || isNaN(current)) return;
-    switch (currentOperation) {
-      case "+":
-        result = prev + current;
-        break;
-      case "-":
-        result = prev - current;
-        break;
-      case "*":
-        result = prev * current;
-        break;
-      case "/":
-        result = prev / current;
-        break;
-      default:
-        return;
+  const isOperator = val => {
+    return val === "+" || val === "-" || val === "*" || val === "/";
+  };
+
+  const getPrecedence = operator => {
+    const precende = {
+      "/": 10,
+      "*": 10,
+      "+": 5,
+      "-": 5
+    };
+    return precende[operator];
+  };
+
+  const isOperand = val => {
+    return !isNaN(val);
+  };
+
+  const getPostfixFromInfix = () => {
+    const infix = infixStack;
+    const outputStack = [];
+    const operatorStack = [];
+    for (let currentChar of infix) {
+      if (isOperand(currentChar)) {
+        outputStack.push(currentChar);
+      } else if (isOperator(currentChar) && operatorStack.length === 0) {
+        operatorStack.push(currentChar);
+      } else {
+        const topOperator = operatorStack[operatorStack.length - 1];
+        if (getPrecedence(currentChar) > getPrecedence(topOperator)) {
+          operatorStack.push(currentChar);
+        } else if (getPrecedence(currentChar) <= getPrecedence(topOperator)) {
+          do {
+            const popped = operatorStack.pop();
+            outputStack.push(popped);
+          } while (
+            getPrecedence(operatorStack[operatorStack.length - 1]) <=
+            getPrecedence(currentChar)
+          );
+          operatorStack.push(currentChar);
+        }
+      }
     }
-    setCurrentOperand(result);
-    setCurrentOperation("");
-    setPreviousOperand("");
+    if (operatorStack) {
+      while (operatorStack.length !== 0) {
+        const op = operatorStack.pop();
+        outputStack.push(op);
+      }
+    }
+    return outputStack;
+  };
+
+  const compute = (a, b, operator) => {
+    switch (operator) {
+      case "+":
+        return a + b;
+      case "-":
+        return a - b;
+      case "*":
+        return a * b;
+      case "/":
+        return a / b;
+      default:
+    }
+  };
+
+  const evaulatePostfix = postfix => {
+    const operandStack = [];
+    postfix.forEach(val => {
+      if (isOperand(val)) {
+        operandStack.push(val);
+      } else if (isOperator(val)) {
+        const b = Number(operandStack.pop());
+        const a = Number(operandStack.pop());
+        const res = compute(a, b, val);
+        operandStack.push(res);
+      }
+    });
+    return operandStack.pop();
+  };
+
+  const evaluate = () => {
+    if (currentOperand) {
+      infixStack.push(currentOperand);
+    }
+    const postfix = getPostfixFromInfix();
+    return evaulatePostfix(postfix);
   };
 
   const inputOperator = operator => {
     if (currentOperand === "") return;
-    // if previous operator is there, compute the result and chain next operation
-    if (previousOperand !== "") {
-      compute();
-    }
-    setCurrentOperation(operator);
-    setPreviousOperand(currentOperand);
+    setInfixStack([...infixStack, currentOperand, operator]);
     setCurrentOperand("");
   };
 
@@ -77,18 +133,20 @@ function App() {
     }
   };
 
+  const getDisplayExpression = () => {
+    return infixStack.join("");
+  };
+
   const equals = () => {
-    compute();
+    const result = evaluate();
+    setCurrentOperand(result);
+    setInfixStack([]);
   };
 
   return (
     <div className="calculator">
       <div id="display" className="display">
-        <div className="previous-operand">
-          {currentOperation !== ""
-            ? getDisplayNumber(previousOperand) + "" + currentOperation
-            : getDisplayNumber(previousOperand)}
-        </div>
+        <div className="expression">{getDisplayExpression()}</div>
         <div className="current-operand">
           {getDisplayNumber(currentOperand)}
         </div>

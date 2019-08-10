@@ -40,7 +40,7 @@ button:hover {
   word-break: break-all;
 }
 
-.display .previous-operand {
+.display .expression {
   color: ghostwhite;
   opacity: 0.75;
   font-size: 1.5rem;
