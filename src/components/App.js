@@ -15,13 +15,13 @@ function App() {
   };
 
   const getPrecedence = operator => {
-    const precende = {
+    const precedence = {
       "/": 10,
       "*": 10,
       "+": 5,
       "-": 5
     };
-    return precende[operator];
+    return precedence[operator];
   };
 
   const isOperand = val => {
@@ -100,7 +100,9 @@ function App() {
   };
 
   const inputOperator = operator => {
-    if (currentOperand === "") return;
+    if (currentOperand === "") {
+      return;
+    }
     setInfixStack([...infixStack, currentOperand, operator]);
     setCurrentOperand("");
   };
