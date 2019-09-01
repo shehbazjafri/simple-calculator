@@ -101,6 +101,17 @@ function App() {
 
   const inputOperator = operator => {
     if (currentOperand === "") {
+      if (operator === "-") {
+        setCurrentOperand("-");
+      }
+      return;
+    }
+    if (currentOperand === "-") {
+      const newExp = [...infixStack];
+      newExp.pop();
+      newExp.push(operator);
+      setInfixStack(newExp);
+      setCurrentOperand("");
       return;
     }
     setInfixStack([...infixStack, currentOperand, operator]);
@@ -108,6 +119,9 @@ function App() {
   };
 
   const getDisplayNumber = number => {
+    if (number === "-") {
+      return number;
+    }
     const strNum = number.toString();
     const intDigits = parseFloat(strNum.split("."));
     const decDigits = strNum.split(".")[1];
