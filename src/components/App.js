@@ -99,17 +99,32 @@ function App() {
     return evaulatePostfix(postfix);
   };
 
+  const replaceLastIndexWith = val => {
+    const newExp = [...infixStack];
+    newExp.pop();
+    newExp.push(val);
+    return newExp;
+  };
+
+  // TODO : Improve this function
   const inputOperator = operator => {
     if (currentOperand === "") {
+      // Current operand becomes blank when an operator is added after a number
       if (operator === "-") {
+        // For negative sign, set the sign to current operand so a number can be appended.
         setCurrentOperand("-");
+      } else {
+        // Replace the last operator with new operator when it's not "-" sign.
+        const replacedOperatorExp = replaceLastIndexWith(operator);
+        setInfixStack(replacedOperatorExp);
       }
       return;
     }
+
+    // When another operator is added after a negative sign, remove both previous operator and negative sign,
+    // and add the new operator (replacing both preceding signs eg. 5*-+5 === 5+5)
     if (currentOperand === "-") {
-      const newExp = [...infixStack];
-      newExp.pop();
-      newExp.push(operator);
+      const newExp = replaceLastIndexWith(operator);
       setInfixStack(newExp);
       setCurrentOperand("");
       return;
