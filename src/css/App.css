@@ -20,6 +20,16 @@
   height: auto;
 }
 
+/* Phone screens */
+@media (max-width: 769px) {
+  .calculator {
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: minmax(120px, 1fr) repeat(5, 1fr);
+    height: 70vh;
+    width: 70vw;
+  }
+}
+
 button {
   font-family: Orbitron, sans-serif;
   font-size: 24px;
