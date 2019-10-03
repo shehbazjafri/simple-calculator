@@ -156,7 +156,7 @@ function App() {
   };
 
   const inputNumber = number => {
-    if (number === "." && currentOperand.includes(".")) return;
+    if (number === "." && currentOperand.toString().includes(".")) return;
     if (currentOperand === 0) {
       setCurrentOperand(number + "");
     } else {
@@ -169,6 +169,9 @@ function App() {
   };
 
   const equals = () => {
+    if (currentOperand === 0) {
+      return;
+    }
     const result = evaluate();
     setCurrentOperand(result);
     setInfixStack([]);
